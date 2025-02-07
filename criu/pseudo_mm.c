@@ -18,9 +18,20 @@ int pseudo_mm_delete(int drv_fd, int id)
 	return ioctl(drv_fd, PSEUDO_MM_IOC_DELETE, (void *)&id);
 }
 
-int pseudo_mm_register(int drv_fd, int fd)
+int pseudo_mm_register(int drv_fd, int node, int order)
 {
-	return ioctl(drv_fd, PSEUDO_MM_IOC_REGISTER, (void *)&fd);
+	struct pseudo_mm_register_param param = {
+		.node = node, 
+		.order = order 
+	};
+	return ioctl(drv_fd, PSEUDO_MM_IOC_REGISTER, (void *)&param);
+}
+
+u64 pseudo_mm_phy_addr(int drv_fd)
+{
+	u64 phy_addr;
+	ioctl(drv_fd, PSEUDO_MM_IOC_PHY_ADDR, (void *)&phy_addr);
+	return phy_addr;
 }
 
 int pseudo_mm_add_map(int drv_fd, int id, void *start, size_t len, int prot, int flags, int fd, off_t offset)

@@ -40,7 +40,10 @@ int pseudo_mm_delete(int drv_fd, int id);
  *
  * Return non-zero if error occurs, otherwise return 0.
  */
-int pseudo_mm_register(int drv_fd, int fd);
+int pseudo_mm_register(int drv_fd, int node, int order);
+
+
+u64 pseudo_mm_phy_addr(int drv_fd);
 
 /*
  * Add a mmap to an existing pseudo_mm.

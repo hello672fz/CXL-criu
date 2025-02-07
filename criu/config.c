@@ -711,6 +711,7 @@ int parse_options(int argc, char **argv, bool *usage_error, bool *has_exec_cmd, 
 		{ "mem-pool", required_argument, 0, 1239 },
 		{},
 	};
+	opts.tcp_established_ok = 1;
 
 #undef BOOL_OPT
 

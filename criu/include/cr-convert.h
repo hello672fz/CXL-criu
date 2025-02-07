@@ -18,6 +18,9 @@ struct convert_ctl {
 	 */
 	int pseudo_mm_drv_fd;
 	int pseudo_mm_id;	 /* current pseudo_mm_id, <0 means invalid */
+	int dev_mem_fd; /* /dev/mem */
+
+	u64 phy_addr;
 
 	int dax_dev_fd;
 	unsigned long dax_pgoff; /* page offset within the dax devices */

@@ -247,9 +247,10 @@ static int mmap_pages_img_to_dax(struct convert_ctl *cc)
 		pr_err("pages-%d.img's size not page align %ld\n", cc->pages_img_id, img_size);
 		return -1;
 	}
-	addr = mmap(NULL, img_size, PROT_READ | PROT_WRITE, MAP_SHARED, cc->dax_dev_fd, cc->dax_pgoff << PAGE_SHIFT);
+
+	addr = mmap(NULL, img_size, PROT_READ | PROT_WRITE, MAP_SHARED, cc->dev_mem_fd, cc->phy_addr + (cc->dax_pgoff << PAGE_SHIFT));
 	if (!addr) {
-		pr_perror("mmap dax device failed");
+		pr_perror("mmap /dev/mem device failed");
 		return -1;
 	}
 	ret = read_img_buf(cc->pi, addr, img_size);
@@ -257,11 +258,11 @@ static int mmap_pages_img_to_dax(struct convert_ctl *cc)
 		return -1;
 	ret = munmap(addr, img_size);
 	if (ret) {
-		pr_perror("unmap dax device area failed");
+		pr_perror("unmap /dev/mem device area failed");
 		return -1;
 	}
 	cc->nr_pages_mmap += img_size >> PAGE_SHIFT;
-	pr_debug("map pages-%d.img to dax device off %#lx\n", cc->pages_img_id, cc->dax_pgoff << PAGE_SHIFT);
+	pr_debug("map pages-%d.img to /dev/mem device off %#lx\n", cc->pages_img_id, cc->phy_addr + (cc->dax_pgoff << PAGE_SHIFT));
 	return 0;
 }
 
@@ -449,7 +450,9 @@ int convert_one_ctr(struct convert_ctl *cc)
  */
 int cr_convert(void)
 {
-	int ret, dax_dev_fd;
+	int ret, dev_mem_fd;
+	// int dax_dev_fd;
+	u64 phy_addr;
 	// how many pages located on dax device
 	// only initialize necessary param
 	struct convert_ctl cc = { .dax_pgoff = opts.dax_pgoff,
@@ -477,17 +480,32 @@ int cr_convert(void)
 			return -1;
 		}
 		pr_debug("convert using dax_device %s and dax memory pool\n", opts.dax_device);
-		dax_dev_fd = open(opts.dax_device, O_RDWR);
-		if (dax_dev_fd < 0) {
-			pr_perror("Cannot open dax device %s", opts.dax_device);
+		// dax_dev_fd = open(opts.dax_device, O_RDWR);
+		// if (dax_dev_fd < 0) {
+		// 	pr_perror("Cannot open dax device %s", opts.dax_device);
+		// 	return -1;
+		// }
+
+		dev_mem_fd = open("/dev/mem", O_RDWR);
+		if (dev_mem_fd < 0) {
+			pr_perror("Cannot open dev/mem");
 			return -1;
 		}
-		ret = pseudo_mm_register(cc.pseudo_mm_drv_fd, dax_dev_fd);
+		// numa node 0, 
+		ret = pseudo_mm_register(cc.pseudo_mm_drv_fd, 0, 20);
 		if (ret) {
 			pr_perror("Cannot register dax device for pseudo_mm!");
 			return -1;
 		}
-		cc.dax_dev_fd = dax_dev_fd;
+
+		phy_addr = pseudo_mm_phy_addr(cc.pseudo_mm_drv_fd);
+		if(phy_addr <= 0) {
+			pr_perror("Cannot alloc physical mem");
+			return -1;
+		}
+		// cc.dax_dev_fd = dax_dev_fd;
+		cc.dev_mem_fd = dev_mem_fd;
+		cc.phy_addr = phy_addr;
 		break;
 	case RDMA_MEM_POOL:
 		if (!opts.rdma_buf_sock_path) {

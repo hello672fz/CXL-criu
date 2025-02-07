@@ -2,7 +2,7 @@
 #define __PSEUDO_MM_IOCTL_H__
 
 #include <linux/ioctl.h>
-#include "types.h"
+#include <linux/types.h>
 
 #define PSEUDO_MM_IOC_MAGIC 0x1c
 
@@ -20,6 +20,15 @@ struct pseudo_mm_add_map_param {
 	int fd;
 	/* offset should be multiply of PAGE_SIZE (same as mmap) */
 	off_t offset;
+};
+
+struct pseudo_mm_register_param {
+	int node; // numa node id
+	int order; // specify the number of pre-allocated frames (i.e., physical memory page), 2^order
+};
+
+struct pseudo_mm_phy_addr_param {
+	unsigned long phy_addr;
 };
 
 struct pseudo_mm_setup_pt_param {
@@ -47,6 +56,14 @@ struct pseudo_mm_attach_param {
 	int id;
 };
 
+struct pseudo_mm_pf_stat_param {
+	pid_t pid;
+	int cow_nr;
+	int slow_rdma_read_nr;
+	int fast_rdma_read_nr;
+	int rdma_read_nr;
+};
+
 /* argument is a fd used to identify the backend dax device */
 #define PSEUDO_MM_IOC_REGISTER _IOW(PSEUDO_MM_IOC_MAGIC, 0x00, int *)
 /* argument is used to RECV pseudo_mm_id */
@@ -61,5 +78,9 @@ struct pseudo_mm_attach_param {
 	_IOW(PSEUDO_MM_IOC_MAGIC, 0x05, struct pseudo_mm_attach_param *)
 #define PSEUDO_MM_IOC_BRING_BACK \
 	_IOW(PSEUDO_MM_IOC_MAGIC, 0x06, struct pseudo_mm_bring_back_param *)
+#define PSEUDO_MM_IOC_PF_STAT \
+	_IOWR(PSEUDO_MM_IOC_MAGIC, 0x07, struct pseudo_mm_pf_stat_param *)
+#define PSEUDO_MM_IOC_PHY_ADDR \
+	_IOWR(PSEUDO_MM_IOC_MAGIC, 0x08, struct pseudo_mm_phy_addr_param *)
 
 #endif
