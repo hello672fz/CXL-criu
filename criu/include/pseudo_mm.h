@@ -83,7 +83,7 @@ int pseudo_mm_attach(int drv_fd, int id, pid_t pid);
 
 int add_page(int drv_fd, int id, unsigned long start, unsigned long size,unsigned long nr_pages, int node);
 
-int update_page(int drv_fd, int id, pid_t pid, unsigned long start, unsigned long size);
+int update_all(int drv_fd, int id, pid_t pid);
 
 /*
  * Bring back the physical page located on CXL memory into local memory.

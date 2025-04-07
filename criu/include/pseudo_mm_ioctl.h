@@ -79,6 +79,11 @@ struct pseudo_mm_add_page_param {
 	int node;
 };
 
+struct pseudo_mm_update_all_param {
+	pid_t pid;
+	int id; //pseudo_mm
+};
+
 /* argument is a fd used to identify the backend dax device */
 #define PSEUDO_MM_IOC_REGISTER _IOW(PSEUDO_MM_IOC_MAGIC, 0x00, int *)
 /* argument is used to RECV pseudo_mm_id */
@@ -103,5 +108,6 @@ struct pseudo_mm_add_page_param {
 	_IOWR(PSEUDO_MM_IOC_MAGIC, 0x0a, int *)
 #define PSEUDO_MM_IOC_ADD_PAGE_TO_POOL \
 	_IOWR(PSEUDO_MM_IOC_MAGIC, 0x0b, int *)
-	
+#define PSEUDO_MM_IOC_UPDATE_ALL \
+	_IOWR(PSEUDO_MM_IOC_MAGIC, 0x0d, int *)	
 #endif
