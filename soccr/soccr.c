@@ -472,6 +472,7 @@ static int libsoccr_set_sk_data_noq(struct libsoccr_sk *sk, struct libsoccr_sk_d
 	int addr_size, mstate;
 	int onr = 0;
 	__u32 seq;
+	char addr_str[INET6_ADDRSTRLEN];
 
 	if (!data || data_size < SOCR_DATA_MIN_SIZE) {
 		loge("Invalid input parameters\n");
@@ -494,8 +495,18 @@ static int libsoccr_set_sk_data_noq(struct libsoccr_sk *sk, struct libsoccr_sk_d
 		addr_size = sizeof(sk->src_addr->v4);
 	else
 		addr_size = sizeof(sk->src_addr->v6);
+	
+	//check if the address is IPv4 or IPv6
+	if (sk->src_addr->sa.sa_family == AF_INET) {
+		inet_ntop(AF_INET, &sk->src_addr->v4.sin_addr, addr_str, sizeof(addr_str));
+	} else {
+		inet_ntop(AF_INET6, &sk->src_addr->v6.sin6_addr, addr_str, sizeof(addr_str));
+	}
+	logerr("Attempting to bind to address: %s, port: %d, addr_size: %d\n", addr_str, ntohs(sk->src_addr->v4.sin_port), addr_size);
+ 
 
 	if (bind(sk->fd, &sk->src_addr->sa, addr_size)) {
+		// logerr("Can't bind inet socket backlfz: %s\n", strerror(errno));
 		logerr("Can't bind inet socket back");
 		return -1;
 	}

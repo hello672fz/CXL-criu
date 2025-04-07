@@ -1514,6 +1514,7 @@ long __export_restore_task(struct task_restore_args *args)
 	struct timeval start;
 	long interval;
 
+
 	bootstrap_start = args->bootstrap_start;
 	bootstrap_len = args->bootstrap_len;
 
@@ -1652,12 +1653,33 @@ long __export_restore_task(struct task_restore_args *args)
 	/*
 	 * Now read the contents (if any)
 	 */
+	// pr_err("cannot attach pseudo_mm %d to process %d", args->pseudo_mm_id, my_pid);
+	// return 0;
+
+	// vma_entry = args->vmas+args->vmas_n-2;
+
+	// ret = add_page(args->pseudo_mm_dev_fd, args->pseudo_mm_id, vma_entry->start, PAGE_SIZE, 2, 0);
+    // if(ret){
+    //     pr_err("add page failed");
+    //     return -1;
+    // }
+	// pr_err("[Criu Add Page]:id=%d,va=%lu",args->pseudo_mm_id,vma_entry->start);
+
 
 	ret = pseudo_mm_attach(args->pseudo_mm_dev_fd, args->pseudo_mm_id, my_pid);
 	if (ret) {
 		pr_err("cannot attach pseudo_mm %d to process %d", args->pseudo_mm_id, my_pid);
 		goto core_restore_end;
 	}
+
+	// ret = update_page(args->pseudo_mm_dev_fd, args->pseudo_mm_id, my_pid, vma_entry->start, PAGE_SIZE);
+    // if(ret){
+    //     pr_err("update page failed");
+    //     return -1;
+    // }
+	// pr_err("[Criu Update page]:id=%d,pid=%d,va=%lu",args->pseudo_mm_id,my_pid,vma_entry->start);
+
+
 	interval = interval_from(&start);
 	if (interval < 0) {
 		goto core_restore_end;
@@ -2084,4 +2106,31 @@ int pseudo_mm_attach(int drv_fd, int id, pid_t pid)
 		.pid = pid,
 	};
 	return sys_ioctl(drv_fd, PSEUDO_MM_IOC_ATTACH, (unsigned long)&param);
+}
+
+
+int add_page(int drv_fd, int id, unsigned long start, unsigned long size,
+    unsigned long nr_pages, int node){
+    
+    struct pseudo_mm_add_page_param param = {
+        .id = id,
+        .vaddr = start,
+        .size = size,
+        .copy_nr_pages = nr_pages,
+        .node = node
+    };
+    
+    return sys_ioctl(drv_fd, PSEUDO_MM_IOC_ADD_PAGE_TO_POOL, (unsigned long)&param);
+}
+
+int update_page(int drv_fd, int id, int pid, unsigned long start, unsigned long size){
+
+    struct pseudo_mm_update_page_param param = {
+        .pid = pid,
+        .id = id,
+        .vaddr = start,
+        .size = size
+    };
+
+    return sys_ioctl(drv_fd, PSEUDO_MM_IOC_UPDATE_PAGE, (unsigned long)&param);
 }

@@ -517,9 +517,13 @@ static int create_ghost(struct ghost_file *gf, GhostFileEntry *gfe, struct cr_im
 	struct mount_info *mi;
 	char path[PATH_MAX], *rel_path, *rel_mp;
 
+	pr_info("create_ghost_lookup_mnt_id,mountid:%d\n",gf->remap.rmnt_id);
+
+
 	if (!(root_ns_mask & CLONE_NEWNS))
 		return nomntns_create_ghost(gf, gfe, img);
 
+	
 	mi = lookup_mnt_id(gf->remap.rmnt_id);
 	if (!mi) {
 		pr_err("The %d mount is not found for ghost\n", gf->remap.rmnt_id);
@@ -617,6 +621,8 @@ static int open_remap_ghost(struct reg_file_info *rfi, RemapFilePathEntry *rpe)
 	struct ghost_file *gf = container_of(rfi->remap, struct ghost_file, remap);
 	GhostFileEntry *gfe = NULL;
 	struct cr_img *img;
+
+	pr_info("open_remap_ghost");
 
 	if (rfi->remap->rpath[0])
 		return 0;

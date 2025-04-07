@@ -1542,12 +1542,15 @@ static int sigchld_process(int status, pid_t pid)
 {
 	int sig;
 
+	// pr_debug("%d killed by signal %d: %s\n", pid, sig, strsignal(sig));
+
 	if (WIFEXITED(status)) {
 		pr_err("%d exited, status=%d\n", pid, WEXITSTATUS(status));
 		return -1;
 	} else if (WIFSIGNALED(status)) {
 		sig = WTERMSIG(status);
-		pr_err("%d killed by signal %d: %s\n", pid, sig, strsignal(sig));
+		// const char *sig_str = (sig >= 0 && sig < NSIG) ? strsignal(sig) : "Unknown Signal";
+		pr_err("%d killed by signal %d: %s,status is %d\n", pid, sig, strsignal(sig),status);
 		return -1;
 	} else if (WIFSTOPPED(status)) {
 		sig = WSTOPSIG(status);
@@ -3757,6 +3760,7 @@ static int sigreturn_restore(pid_t pid, struct task_restore_args *task_args, uns
 	struct timeval start, end;
 	long interval;
 
+
 	pr_info("Restore via sigreturn\n");
 	gettimeofday(&start, NULL);
 
@@ -3839,7 +3843,11 @@ static int sigreturn_restore(pid_t pid, struct task_restore_args *task_args, uns
 	 * might be completely unused so it's here just for convenience.
 	 */
 	task_args->clone_restore_fn = restorer_sym(mem, arch_export_restore_thread);
+
+
 	restore_task_exec_start = restorer_sym(mem, arch_export_restore_task);
+
+
 	rsti(current)->munmap_restorer = restorer_munmap_addr(core, mem);
 
 	task_args->bootstrap_start = mem;

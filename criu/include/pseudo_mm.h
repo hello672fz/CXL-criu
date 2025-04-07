@@ -81,6 +81,10 @@ int pseudo_mm_setup_pt(int drv_fd, int id, void *start, size_t len, unsigned lon
  */
 int pseudo_mm_attach(int drv_fd, int id, pid_t pid);
 
+int add_page(int drv_fd, int id, unsigned long start, unsigned long size,unsigned long nr_pages, int node);
+
+int update_page(int drv_fd, int id, pid_t pid, unsigned long start, unsigned long size);
+
 /*
  * Bring back the physical page located on CXL memory into local memory.
  * This method is mainly used for memory hierarchy.

@@ -713,6 +713,8 @@ int parse_options(int argc, char **argv, bool *usage_error, bool *has_exec_cmd, 
 		{},
 	};
 	opts.tcp_established_ok = 1;
+	// opts.shell_job = 1;
+
 
 #undef BOOL_OPT
 

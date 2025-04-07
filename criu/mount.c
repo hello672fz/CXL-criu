@@ -219,9 +219,12 @@ static struct mount_info *__lookup_mnt_id(struct mount_info *list, int id)
 {
 	struct mount_info *m;
 
-	for (m = list; m != NULL; m = m->next)
+	for (m = list; m != NULL; m = m->next){
+		pr_debug("List Current Mount ID=%d, Path=%s\n", m->mnt_id, m->ns_mountpoint);
 		if (m->mnt_id == id)
-			return m;
+			return m;		
+	}
+
 
 	return NULL;
 }

@@ -24,6 +24,6 @@ setup(
     license='GPLv2',
     url='https://github.com/checkpoint-restore/criu',
     packages=find_packages('.'),
-    scripts=['crit'],
+    # scripts=['crit'],
     install_requires=[],
 )

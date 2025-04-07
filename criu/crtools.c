@@ -310,7 +310,6 @@ int main(int argc, char *argv[], char *envp[])
 	if (opts.mode == CR_RESTORE) {
 		if (opts.tree_id)
 			pr_warn("Using -t with criu restore is obsoleted\n");
-
 		ret = cr_restore_tasks();
 		if (ret == 0 && opts.exec_cmd) {
 			close_pid_proc();
